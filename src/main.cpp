@@ -5,8 +5,8 @@
 #include <Hash.h>
 #include <ESP8266mDNS.h>
 
-const char *ssid = "PlantPot";
-const char *password = "123456789"; // at least 8 characters for AP
+const char *ssid = "SmartPot";
+const char *password = "1234567891"; // at least 8 characters for AP
 const boolean accessPoint = true;
 
 AsyncWebServer server(80);
@@ -77,9 +77,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
                     pumpState = true;
                     digitalWrite(pump, LOW);
                     webSocket.broadcastTXT("pTrue");
-                    /*delay(2000);
-                    digitalWrite(pump, LOW);
-                    pumpState = false;*/
                     tsPump = millis();
                 }
                 break;
@@ -133,7 +130,7 @@ void setup() {
     USE_SERIAL.begin(115200);
 
     pinMode(pump, OUTPUT);
-    digitalWrite(pump, LOW);
+    digitalWrite(pump, HIGH);
 
     if (!SPIFFS.begin())
     {
