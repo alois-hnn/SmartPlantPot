@@ -66,9 +66,9 @@ btn.onclick = function() {
 // Make the function wait until the connection is made...
 function waitForSocketConnection(socket, callback){
     setTimeout(function () {
-        if (socket.readyState === 1) {
+        if(socket.readyState === 1) {
             console.log("Connection is made")
-            if (callback != null){
+            if(callback != null){
                 callback();
             }
         } else {
