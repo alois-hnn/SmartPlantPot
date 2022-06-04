@@ -6,7 +6,7 @@ It provides the possibility to either build an access point or connect to an exi
 
 <p align="center">
   <img width="341" alt="image" src="https://user-images.githubusercontent.com/84097316/172027399-0b4c3832-5f4c-44e0-8bcb-e03cb1b58f85.png">
-</p></br>
+</p>
   
 ### Libraries
 
