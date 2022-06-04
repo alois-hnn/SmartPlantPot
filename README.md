@@ -2,11 +2,11 @@
 
 This code is made for a smart plant pot. In detail it works with a capacitive moisture Sensor, Wemos and a small pump. Thus it can be used for any other self watering project, which uses similar components.
 
-It provides the possibility to either build an access point or connect to an existing WiFi-Network. The webserver can be accessed via the main route http://smartpot/ or its IP address (AP Mode: 192.168.4.1).
+It provides the possibility to either build an access point or connect to an existing WiFi-Network. The webserver can be accessed via the main route http://smartpot/ or its IP address (AP Mode: 192.168.4.1).</br></br>
 
 <p align="center">
   <img width="341" alt="image" src="https://user-images.githubusercontent.com/84097316/172027399-0b4c3832-5f4c-44e0-8bcb-e03cb1b58f85.png">
-</p>
+</p></br>
   
 ### Libraries
 
