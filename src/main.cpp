@@ -7,7 +7,7 @@
 
 const char *ssid = "SmartPot";
 const char *password = "1234567891"; // at least 8 characters for AP
-const boolean accessPoint = true;
+const boolean accessPoint = true; // adjust for AP Mode
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -16,14 +16,27 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 // Sensor calibrate values and pump pin
 
+int pump = 5;
 int wet = 470;
 int dry = 1024;
-int pump = 5;
-boolean pumpState = false;
-int lastHum;
+
+// lowest humidity in percentage
+
+int lowest = 50;
+
+// turn pump off after n milliseconds
+
+int pumpDuration = 2000;
+
+// helper variables
 
 unsigned long int tsMessage;
 unsigned long int tsPump;
+
+boolean pumpState = false;
+int lastHum;
+
+// Humidity value
 
 int getHum() {
     int sensorValue = analogRead(A0);
@@ -36,12 +49,31 @@ int getHum() {
     return humidity;
 }
 
+// HUmidity value as message + index h
+
 String getHumMSG() {
     int humidity = getHum();
     String msg = "";
     msg.concat(humidity);
     msg = 'h' + msg;
     return msg;
+}
+
+// function used by the automatic humidity message updater in loop
+
+void humUpdate() {
+    String msg = getHumMSG();
+    webSocket.broadcastTXT(msg);
+    tsMessage = millis();
+
+    lastHum = getHum();
+}
+
+void pumpON() {
+    digitalWrite(pump, LOW);
+    pumpState = true;
+    tsPump = millis();
+    webSocket.broadcastTXT("pTrue");
 }
 
 
@@ -74,10 +106,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         switch(index) {
             case 'p':
                 if(pumpState == false) {
-                    pumpState = true;
-                    digitalWrite(pump, LOW);
-                    webSocket.broadcastTXT("pTrue");
-                    tsPump = millis();
+                    pumpON();
                 }
                 break;
         }
@@ -183,48 +212,38 @@ void loop()
 {
     MDNS.update();
     webSocket.loop();
+
+    // humidity msg updater
+
     unsigned long int time = millis();
     if(pumpState == false) {
         if(tsMessage == NULL || tsMessage + 1000 < time) {
-            String msg = getHumMSG();
-            webSocket.broadcastTXT(msg);
-            tsMessage = millis();
-
-            lastHum = getHum();
+            humUpdate();
         }
     } else {
         if(tsMessage == NULL || tsMessage + 300 < time) {
-            String msg = getHumMSG();
-            webSocket.broadcastTXT(msg);
-            tsMessage = millis();
-
-            lastHum = getHum();
+            humUpdate();
         }
     }
-    
-    
-    // pump control
+
+    // humidity control
 
     if(pumpState == false) {
-        if(lastHum != NULL && lastHum < 50) {
-            digitalWrite(pump, LOW);
-            pumpState = true;
-            tsPump = millis();
-            webSocket.broadcastTXT("pTrue");
-            String msg = getHumMSG();
-            webSocket.broadcastTXT(msg);
+        if(lastHum != NULL && lastHum < lowest) {
+            pumpON();
         }
     }
     
+    // turn pump off when on
+
     if(tsPump != NULL && pumpState == true) {
-        if(tsPump + 2000 < time) {
+        if(tsPump + pumpDuration < time) {
             digitalWrite(pump, HIGH);
             pumpState = false;
             webSocket.broadcastTXT("pFalse");
             String msg = getHumMSG();
             webSocket.broadcastTXT(msg);
             tsPump = NULL;
-            
         } 
     }
 }
